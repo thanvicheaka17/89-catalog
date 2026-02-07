@@ -2,6 +2,8 @@
 # This reduces deployment size and improves build times
 
 # Dependencies (will be installed during build)
+# Note: /vendor will be installed automatically by vercel-php runtime
+# Keep it ignored to reduce upload size - runtime will install it
 /vendor
 /node_modules
 
