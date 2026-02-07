@@ -1,0 +1,51 @@
+# Vercel ignore file - prevents uploading unnecessary files
+# This reduces deployment size and improves build times
+
+# Dependencies (will be installed during build)
+/vendor
+/node_modules
+
+# Development files
+/.git
+/.github
+/.docker
+/docker
+/docker-compose.yml
+/Dockerfile
+/.dockerignore
+
+# Environment files (use Vercel environment variables instead)
+/.env
+/.env.*
+!.env.example
+
+# Storage and cache (ephemeral on Vercel)
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/views
+/bootstrap/cache
+
+# Test files
+/tests
+/phpunit.xml
+
+# Documentation
+/README.md
+/VERCEL_DEPLOYMENT.md
+
+# IDE files
+/.idea
+/.vscode
+*.swp
+*.swo
+*~
+
+# Build artifacts (will be generated)
+/public/build
+/public/hot
+/public/storage
+
+# Temporary files
+*.log
+*.tmp
