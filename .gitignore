@@ -1,0 +1,17 @@
+/node_modules
+/dist
+/build
+/dist-ssr
+/coverage
+/logs
+/temp
+/cache
+/backup
+/vendor
+/node_modules
+/dist
+/build
+/dist-ssr
+.env
+.env.local
+*.zip
