@@ -14,8 +14,10 @@ if ! command -v composer &> /dev/null; then
         exit 1
     fi
     
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    php composer-setup.php --install-dir=. --filename=composer
     rm composer-setup.php
+    chmod +x composer
+    export PATH="$PATH:$(pwd)"
 fi
 
 # Install PHP dependencies
