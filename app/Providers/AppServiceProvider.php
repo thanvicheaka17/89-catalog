@@ -25,5 +25,10 @@ class AppServiceProvider extends ServiceProvider
         Notification::extend('sms', function ($app) {
             return new SmsChannel($app->make(\App\Services\AwsSmsService::class));
         });
+
+        // Force HTTPS in production (Vercel)
+        if (config('app.env') === 'production') {
+            \URL::forceScheme('https');
+        }
     }
 }
