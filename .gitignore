@@ -15,3 +15,5 @@
 .env
 .env.local
 *.zip
+.vercel
+.env*.local

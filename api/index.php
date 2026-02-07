@@ -3,37 +3,49 @@
 // Vercel serverless function entry point for Laravel
 // This file routes all requests to Laravel's public/index.php
 
-// Fix request URI for Vercel serverless environment
-// Vercel may not set REQUEST_URI correctly, so we need to construct it
+// Get the original request path from Vercel
+// When Vercel routes /api/promo to this function, we need to extract the path correctly
+$originalPath = '/';
+
+// Check various ways Vercel might pass the path
 if (isset($_SERVER['HTTP_X_VERCEL_ORIGINAL_PATH'])) {
-    // Vercel provides the original path in this header
-    $_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_VERCEL_ORIGINAL_PATH'];
-    if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
-        $_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
-    }
-} elseif (!isset($_SERVER['REQUEST_URI']) || empty($_SERVER['REQUEST_URI'])) {
-    // Fallback: construct from available server variables
-    $path = $_SERVER['PATH_INFO'] ?? $_SERVER['ORIG_PATH_INFO'] ?? $_SERVER['SCRIPT_NAME'] ?? '/';
-    
-    // Remove the /api/index.php prefix if present
-    $path = preg_replace('#^/api/index\.php#', '', $path);
-    if (empty($path)) {
-        $path = '/';
-    }
-    
-    $_SERVER['REQUEST_URI'] = $path;
-    if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
-        $_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
-    }
+    // Vercel's original path header
+    $originalPath = $_SERVER['HTTP_X_VERCEL_ORIGINAL_PATH'];
+} elseif (isset($_SERVER['PATH_INFO']) && !empty($_SERVER['PATH_INFO'])) {
+    // PATH_INFO is set by Vercel
+    $originalPath = $_SERVER['PATH_INFO'];
+} elseif (isset($_SERVER['REQUEST_URI'])) {
+    // Extract path from REQUEST_URI (remove query string)
+    $requestUri = $_SERVER['REQUEST_URI'];
+    $queryPos = strpos($requestUri, '?');
+    $originalPath = $queryPos !== false ? substr($requestUri, 0, $queryPos) : $requestUri;
 }
 
-// Ensure PATH_INFO is set correctly
-if (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) {
-    if (isset($_SERVER['REQUEST_URI'])) {
-        $requestUri = $_SERVER['REQUEST_URI'];
-        $queryPos = strpos($requestUri, '?');
-        $_SERVER['PATH_INFO'] = $queryPos !== false ? substr($requestUri, 0, $queryPos) : $requestUri;
-    }
+// Normalize the path (ensure it starts with /)
+if (substr($originalPath, 0, 1) !== '/') {
+    $originalPath = '/' . $originalPath;
+}
+
+// Set REQUEST_URI with query string if present
+$_SERVER['REQUEST_URI'] = $originalPath;
+if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
+    $_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
+}
+
+// Set PATH_INFO (Laravel uses this for routing)
+$_SERVER['PATH_INFO'] = $originalPath;
+
+// Ensure REQUEST_METHOD is set
+if (!isset($_SERVER['REQUEST_METHOD'])) {
+    $_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? $_SERVER['REQUEST_METHOD'] ?? 'GET';
+}
+
+// Set SCRIPT_NAME for Laravel
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+
+// Ensure PHP_SELF is set
+if (!isset($_SERVER['PHP_SELF'])) {
+    $_SERVER['PHP_SELF'] = '/index.php';
 }
 
 require __DIR__ . '/../public/index.php';
